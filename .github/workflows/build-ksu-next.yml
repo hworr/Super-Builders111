@@ -22,9 +22,12 @@ on:
       add_susfs:
         type: boolean
         default: true
-      add_zeromount:
+      add_hymo:
         type: boolean
-        default: true
+        default: true  
+#      add_zeromount:
+#        type: boolean
+#        default: true
       add_zram:
         type: boolean
         default: true
@@ -37,6 +40,9 @@ on:
       add_kpm:
         type: boolean
         default: false
+      add_droidspaces:
+        type: boolean
+        default: true
       sukisu_commit:
         type: string
         default: ""
@@ -185,6 +191,34 @@ jobs:
       run: |
         FIX_SCRIPT="$GITHUB_WORKSPACE/$VERSION_DIR/build-helpers/fix-old-kernel-compat.sh"
         [ -f "$FIX_SCRIPT" ] && bash "$FIX_SCRIPT" "$KERNEL_ROOT/common" "$SUBLEVEL" || true
+        
+    - name: Apply Droidspaces GKI Patches
+      if: ${{ inputs.add_droidspaces == true }}
+      working-directory: ${{ env.KERNEL_ROOT }}/common
+      run: |
+        echo "Fetching Droidspaces GKI ABI/CRC bypass patch..."
+        wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/01.disable_crc_checks_for_lkms.patch
+        
+        echo "Applying patch..."
+        patch -p1 < 01.disable_crc_checks_for_lkms.patch
+        
+        echo "Fetching Droidspaces cgroup file patch..."
+        wget "https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/02.fix_restore cgroup file prefix handling .patch"
+        
+        echo "Applying patch..."
+        patch -p1 < "02.fix_restore cgroup file prefix handling .patch"
+        
+        echo "Fetching Droidspaces posix_mqueue patch..."
+        "wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/03.5.15+_use_android_abi_padding_for_posix_mqueue.patch"
+        
+        echo "Applying patch..."
+        patch -p1 < "03.5.15+_use_android_abi_padding_for_posix_mqueue.patch"
+        
+        echo "Fetching Droidspaces GKI sysvipc_task_struct patch..."
+        "wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/04.use_android_abi_padding_for_sysvipc_task_struct.patch"
+        
+        echo "Applying patch..."
+        patch -p1 < "04.use_android_abi_padding_for_sysvipc_task_struct.patch"
 
     - name: Apply Upstream SUSFS Patch
       if: inputs.add_susfs
@@ -204,12 +238,18 @@ jobs:
       run: |
         PATCH="$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/70_ksu_safety-kernelsu-next-${KERNEL_VER}.patch"
         [ -s "$PATCH" ] && patch -p1 --no-backup-if-mismatch < "$PATCH" || echo "No 70_ patch needed"
-
-    - name: Apply ZeroMount Patch
-      if: inputs.add_zeromount && inputs.add_susfs
+        
+    - name: Apply HymoFS Patch
+      if: inputs.add_hymo
       working-directory: ${{ env.KERNEL_ROOT }}/common
       run: |
-        patch -p1 -F3 --no-backup-if-mismatch < "$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/60_zeromount-${ANDROID_VER}-${KERNEL_VER}.patch"
+        curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig    
+
+#    - name: Apply ZeroMount Patch
+#      if: inputs.add_zeromount && inputs.add_susfs
+#      working-directory: ${{ env.KERNEL_ROOT }}/common
+#      run: |
+#        patch -p1 -F3 --no-backup-if-mismatch < "$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/60_zeromount-${ANDROID_VER}-${KERNEL_VER}.patch"
 
     - name: Fix SUSFS Compatibility
       if: inputs.add_susfs

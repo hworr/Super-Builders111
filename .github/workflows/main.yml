@@ -36,10 +36,18 @@ on:
         description: "Add Enhanced SUSFS"
         type: boolean
         default: true
-      add_zeromount:
-        description: "Add ZeroMount"
+      add_droidspaces:
+        description: "Add Droidspaces Core Support"
         type: boolean
         default: true
+      add_hymo:
+        description: "Add Hymo (Kernel Module Management)"
+        type: boolean
+        default: true  
+#      add_zeromount:
+#        description: "Add ZeroMount"
+#        type: boolean
+#        default: true
       add_zram:
         description: "Add ZRAM with LZ4K/LZ4KD"
         type: boolean
@@ -56,6 +64,10 @@ on:
         description: "Add KPM (SukiSU/ReSukiSU)"
         type: boolean
         default: false
+      add_droidspaces:
+        description: "Add Droidspaces Core Support"
+        type: boolean
+        default: true  
       sukisu_commit:
         description: "SukiSU commit (empty = pinned default)"
         type: string
@@ -76,7 +88,8 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
@@ -91,11 +104,13 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}
 
@@ -106,11 +121,13 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}
 
@@ -121,11 +138,13 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}
 
@@ -136,11 +155,13 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}
 
@@ -151,11 +172,13 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}
 
@@ -166,11 +189,13 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}
 
@@ -181,10 +206,12 @@ jobs:
     with:
       ksu_variant: ${{ inputs.ksu_variant }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ inputs.device_codename }}

@@ -152,10 +152,14 @@ on:
         description: "Add SUSFS"
         type: boolean
         default: true
-      add_zeromount:
-        description: "Add ZeroMount"
+      add_hymo:
+        description: "Add Hymo (Kernel Module Management)"
         type: boolean
-        default: true
+        default: true  
+#      add_zeromount:
+#        description: "Add ZeroMount"
+#        type: boolean
+#        default: true
       add_zram:
         description: "Add ZRAM with LZ4K"
         type: boolean
@@ -172,6 +176,10 @@ on:
         description: "Add KPM (SukiSU/ReSukiSU)"
         type: boolean
         default: false
+      add_droidspaces:
+        description: "Add Droidspaces Core Support"
+        type: boolean
+        default: true
       sukisu_commit:
         description: "KSU commit override (empty = latest)"
         type: string
@@ -190,9 +198,12 @@ on:
       add_susfs:
         type: boolean
         default: true
-      add_zeromount:
+      add_hymo:
         type: boolean
         default: true
+#      add_zeromount:
+#        type: boolean
+#        default: true
       add_zram:
         type: boolean
         default: true
@@ -205,6 +216,9 @@ on:
       add_kpm:
         type: boolean
         default: false
+      add_droidspaces:
+        type: boolean
+        default: true  
       sukisu_commit:
         type: string
         default: ""
@@ -441,7 +455,7 @@ jobs:
       sub_level: ${{ needs.resolve.outputs.sub_level }}
       os_patch_level: ${{ needs.resolve.outputs.os_patch_level }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
@@ -459,11 +473,13 @@ jobs:
       sub_level: ${{ needs.resolve.outputs.sub_level }}
       os_patch_level: ${{ needs.resolve.outputs.os_patch_level }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ needs.resolve.outputs.device_codename }}
 
@@ -477,11 +493,13 @@ jobs:
       sub_level: ${{ needs.resolve.outputs.sub_level }}
       os_patch_level: ${{ needs.resolve.outputs.os_patch_level }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ needs.resolve.outputs.device_codename }}
 
@@ -495,10 +513,12 @@ jobs:
       sub_level: ${{ needs.resolve.outputs.sub_level }}
       os_patch_level: ${{ needs.resolve.outputs.os_patch_level }}
       add_susfs: ${{ inputs.add_susfs }}
-      add_zeromount: ${{ inputs.add_zeromount }}
+      add_hymo: ${{ inputs.add_hymo }}
+#      add_zeromount: ${{ inputs.add_zeromount }}
       add_zram: ${{ inputs.add_zram }}
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
+      add_droidspaces: ${{ inputs.add_droidspaces }}
       sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ needs.resolve.outputs.device_codename }}
