@@ -10,7 +10,7 @@ on:
       kernel_target:
         description: "Kernel target"
         type: choice
-        default: "android12-5.10.209 (2024-05)"
+        default: "android15-6.6.102 (2025-10)"
         options:
           - "android12-5.10.107 (2022-11)"
           - "android12-5.10.149 (2023-01)"
@@ -155,7 +155,7 @@ on:
       add_hymo:
         description: "Add Hymo (Kernel Module Management)"
         type: boolean
-        default: true  
+        default: true
 #      add_zeromount:
 #        description: "Add ZeroMount"
 #        type: boolean
@@ -218,7 +218,7 @@ on:
         default: false
       add_droidspaces:
         type: boolean
-        default: true  
+        default: true
       sukisu_commit:
         type: string
         default: ""
