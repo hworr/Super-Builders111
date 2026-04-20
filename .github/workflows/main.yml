@@ -43,7 +43,7 @@ on:
       add_hymo:
         description: "Add Hymo (Kernel Module Management)"
         type: boolean
-        default: true  
+        default: true
 #      add_zeromount:
 #        description: "Add ZeroMount"
 #        type: boolean
