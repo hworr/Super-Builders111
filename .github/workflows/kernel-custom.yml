@@ -222,7 +222,7 @@ on:
       sukisu_commit:
         type: string
         default: ""
-
+ 
 jobs:
   resolve:
     name: Resolve Target
