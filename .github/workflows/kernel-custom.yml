@@ -520,6 +520,6 @@ jobs:
       add_bbg: ${{ inputs.add_bbg }}
       add_overlayfs_support: ${{ inputs.add_overlayfs_support }}
       add_kpm: ${{ inputs.add_kpm }}
-      add_droidspaces: ${{ inputs.add_droidspaces }}
+#      add_droidspaces: ${{ inputs.add_droidspaces }}
 #      sukisu_commit: ${{ inputs.sukisu_commit }}
       device_codename: ${{ needs.resolve.outputs.device_codename }}
