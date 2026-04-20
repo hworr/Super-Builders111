@@ -196,29 +196,21 @@ jobs:
       if: ${{ inputs.add_droidspaces == true }}
       working-directory: ${{ env.KERNEL_ROOT }}/common
       run: |
-        echo "Fetching Droidspaces GKI ABI/CRC bypass patch..."
-        wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/01.disable_crc_checks_for_lkms.patch
+        echo "Cloning LXC-Patches repository..."
+        git clone https://github.com/hworr93/LXC-Patches.git ../LXC-Patches-Repo
         
-        echo "Applying patch..."
-        patch -p1 < 01.disable_crc_checks_for_lkms.patch
+        echo "Applying patches..."
+        # If your patches are in a subfolder (e.g., 'patches/'), change the path to ../LXC-Patches-Repo/patches/*.patch
+        for patch in ../LXC-Patches-Repo/*.patch; do
+          if [ -f "$patch" ]; then
+            echo "Applying $(basename "$patch")..."
+            patch -p1 --no-backup-if-mismatch < "$patch" || echo "::warning::Failed to apply $(basename "$patch")"
+          fi
+        done
         
-        echo "Fetching Droidspaces cgroup file patch..."
-        wget "https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/02.fix_restore cgroup file prefix handling .patch"
-        
-        echo "Applying patch..."
-        patch -p1 < "02.fix_restore cgroup file prefix handling .patch"
-        
-        echo "Fetching Droidspaces posix_mqueue patch..."
-        "wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/03.5.15+_use_android_abi_padding_for_posix_mqueue.patch"
-        
-        echo "Applying patch..."
-        patch -p1 < "03.5.15+_use_android_abi_padding_for_posix_mqueue.patch"
-        
-        echo "Fetching Droidspaces GKI sysvipc_task_struct patch..."
-        "wget https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/main/Documentation/resources/kernel-patches/GKI/04.use_android_abi_padding_for_sysvipc_task_struct.patch"
-        
-        echo "Applying patch..."
-        patch -p1 < "04.use_android_abi_padding_for_sysvipc_task_struct.patch"
+        echo "Cleaning up..."
+        rm -rf ../LXC-Patches-Repo
+
 
     - name: Apply Upstream SUSFS Patch
       if: inputs.add_susfs
