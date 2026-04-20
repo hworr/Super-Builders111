@@ -64,10 +64,10 @@ on:
         description: "Add KPM (SukiSU/ReSukiSU)"
         type: boolean
         default: false
-      add_droidspaces:
-        description: "Add Droidspaces Core Support"
-        type: boolean
-        default: true  
+      #add_droidspaces:
+      #  description: "Add Droidspaces Core Support"
+      #  type: boolean
+      #  default: true  
       sukisu_commit:
         description: "SukiSU commit (empty = pinned default)"
         type: string
