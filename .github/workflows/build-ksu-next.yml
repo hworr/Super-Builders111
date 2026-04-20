@@ -211,6 +211,13 @@ jobs:
         echo "Cleaning up..."
         rm -rf ../LXC-Patches-Repo
 
+    - name: Apply HymoFS
+      if: inputs.add_hymo
+      working-directory: ${{ env.KERNEL_ROOT }}/common
+      run: |
+        echo "Applying HymoFS first..."
+        curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig
+
 
     - name: Apply Upstream SUSFS Patch
       if: inputs.add_susfs
@@ -230,12 +237,6 @@ jobs:
       run: |
         PATCH="$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/70_ksu_safety-kernelsu-next-${KERNEL_VER}.patch"
         [ -s "$PATCH" ] && patch -p1 --no-backup-if-mismatch < "$PATCH" || echo "No 70_ patch needed"
-        
-    - name: Apply HymoFS Patch
-      if: inputs.add_hymo
-      working-directory: ${{ env.KERNEL_ROOT }}/common
-      run: |
-        curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig    
 
 #    - name: Apply ZeroMount Patch
 #      if: inputs.add_zeromount && inputs.add_susfs
