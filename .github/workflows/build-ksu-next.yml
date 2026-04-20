@@ -24,7 +24,7 @@ on:
         default: true
       add_hymo:
         type: boolean
-        default: true  
+        default: true
 #      add_zeromount:
 #        type: boolean
 #        default: true
