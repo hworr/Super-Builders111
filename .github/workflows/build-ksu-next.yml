@@ -218,12 +218,27 @@ jobs:
         echo "Applying HymoFS first..."
         curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig
 
-
     - name: Apply Upstream SUSFS Patch
       if: inputs.add_susfs
       working-directory: ${{ env.KERNEL_ROOT }}/common
       run: |
-        patch -p1 -F3 --no-backup-if-mismatch < "$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/50_add_susfs_in_gki-${ANDROID_VER}-${KERNEL_VER}.patch"
+        # Install wiggle for advanced patch conflict resolution
+        sudo apt-get update -qq && sudo apt-get install -y -qq wiggle
+        
+        PATCH_FILE="$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/50_add_susfs_in_gki-${ANDROID_VER}-${KERNEL_VER}.patch"
+        
+        echo "Applying SUSFS Patch..."
+        # Use || true so the workflow does not abort when readdir.c rejects the hunks
+        patch -p1 -F3 --no-backup-if-mismatch < "$PATCH_FILE" || true
+        
+        # If patch created a rejects file for readdir.c, use wiggle to merge the conflicting structs
+        if [ -f "fs/readdir.c.rej" ]; then
+            echo "Merging HymoFS and SUSFS struct conflicts in fs/readdir.c..."
+            wiggle --replace fs/readdir.c fs/readdir.c.rej
+            
+            # Clean up the residual files left by wiggle
+            rm -f fs/readdir.c.rej fs/readdir.c.porig
+        fi
 
     - name: Apply Enhanced SUSFS Patch
       if: inputs.add_susfs
