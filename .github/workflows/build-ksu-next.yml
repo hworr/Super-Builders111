@@ -211,12 +211,12 @@ jobs:
         echo "Cleaning up..."
         rm -rf ../LXC-Patches-Repo
 
-    - name: Apply HymoFS
-      if: inputs.add_hymo
-      working-directory: ${{ env.KERNEL_ROOT }}/common
-      run: |
-        echo "Applying HymoFS first..."
-        curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig
+    #- name: Apply HymoFS
+    #  if: inputs.add_hymo
+    #  working-directory: ${{ env.KERNEL_ROOT }}/common
+    #  run: |
+    #    echo "Applying HymoFS first..."
+        # curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig
 
     - name: Apply Upstream SUSFS Patch
       if: inputs.add_susfs
@@ -266,6 +266,14 @@ jobs:
 #      working-directory: ${{ env.KERNEL_ROOT }}/common
 #      run: |
 #        patch -p1 -F3 --no-backup-if-mismatch < "$GITHUB_WORKSPACE/$VERSION_DIR/KernelSU-Next/patches/60_zeromount-${ANDROID_VER}-${KERNEL_VER}.patch"
+
+    - name: Apply HymoFS
+      if: inputs.add_hymo
+      working-directory: ${{ env.KERNEL_ROOT }}/common
+      run: |
+        echo "Applying HymoFS first..."
+        # curl -LSs "https://raw.githubusercontent.com/Anatdx/HymoFS/main/setup.sh" | bash -s defconfig arch/arm64/configs/gki_defconfig
+        curl -LSs https://raw.githubusercontent.com/UserXP-web/kernel_build/main/patches/hymofs/setup.sh | bash -s defconfig arch/arm64/configs/gki_defconfig
 
     - name: Fix SUSFS Compatibility
       if: inputs.add_susfs
