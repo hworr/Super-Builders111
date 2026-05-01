@@ -37,6 +37,12 @@ on:
       add_kpm:
         type: boolean
         default: false
+      add_ptrace_fix:
+        type: boolean
+        default: true
+      add_perf_patches:
+        type: boolean
+        default: true
       sukisu_commit:
         type: string
         default: ""
@@ -55,7 +61,7 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Free Disk Space
       uses: endersonmenezes/free-disk-space@v3
@@ -76,26 +82,26 @@ jobs:
       run: sudo apt-get install -y -qq lld binutils
 
     - name: Download AnyKernel3 Artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: anykernel3
         path: AnyKernel3
 
     - name: Download Git Repo Tool Artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: git-repo-tool
         path: git-repo
 
     - name: Download Kernel Patches Artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: kernel-patches
         path: kernel_patches
 
     - name: Download SukiSU Patch
       if: inputs.add_zram
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: sukisu-patch
         path: SukiSU_patch
@@ -180,11 +186,40 @@ jobs:
           echo "Pinned WKSU to $(git rev-parse --short=7 HEAD)"
         fi
 
+        cd "$KERNEL_ROOT/common"
+
+        SUPERCALLS="drivers/kernelsu/supercalls.c"
+        if [ -f "$SUPERCALLS" ]; then
+          sed -i '/ksu_mark_running_process/d' "$SUPERCALLS"
+          if grep -q "vzalloc" "$SUPERCALLS" && ! head -5 "$SUPERCALLS" | grep -q "vmalloc.h"; then
+            sed -i '1a #include <linux/vmalloc.h>' "$SUPERCALLS"
+          fi
+        fi
+
     - name: Fix Old Kernel Compatibility
       working-directory: ${{ env.KERNEL_ROOT }}/common
       run: |
         FIX_SCRIPT="$GITHUB_WORKSPACE/$VERSION_DIR/build-helpers/fix-old-kernel-compat.sh"
         [ -f "$FIX_SCRIPT" ] && bash "$FIX_SCRIPT" "$KERNEL_ROOT/common" "$SUBLEVEL" || true
+
+    - name: Apply Local WildKSU Patchset
+      working-directory: ${{ env.KERNEL_ROOT }}/common
+      run: |
+        PATCH_DIR="$GITHUB_WORKSPACE/$VERSION_DIR/WildKSU/patches"
+        [ -d "$PATCH_DIR" ] || exit 0
+
+        shopt -s nullglob
+        PRE_PATCHES=("$PATCH_DIR"/[0-9][0-9][0-9]*.patch)
+        shopt -u nullglob
+        [ ${#PRE_PATCHES[@]} -gt 0 ] || exit 0
+
+        for p in "${PRE_PATCHES[@]}"; do
+          base="$(basename "$p")"
+          case "$base" in
+            50_*|51_*|60_*|70_*|*_archive/*) continue ;;
+          esac
+          patch -p1 -F3 --no-backup-if-mismatch < "$p"
+        done
 
     - name: Apply Upstream SUSFS Patch
       if: inputs.add_susfs
@@ -217,6 +252,15 @@ jobs:
       run: |
         FIX="$GITHUB_WORKSPACE/$VERSION_DIR/build-helpers/fix-susfs-compat.sh"
         [ -f "$FIX" ] && bash "$FIX" . "$SUBLEVEL" "$ANDROID_VER" "$KERNEL_VER" "$KERNEL_PATCHES" || true
+
+    - name: Apply Kernel Patches
+      if: inputs.add_ptrace_fix || inputs.add_perf_patches
+      working-directory: ${{ env.KERNEL_ROOT }}/common
+      env:
+        ADD_PTRACE: ${{ inputs.add_ptrace_fix }}
+        ADD_PERF: ${{ inputs.add_perf_patches }}
+      run: |
+        bash "$GITHUB_WORKSPACE/android12-5.10/build-helpers/apply-kernel-patches.sh" . "$KERNEL_VER" "$KERNEL_PATCHES"
 
     - name: Setup Baseband Guard
       if: inputs.add_bbg
@@ -331,7 +375,7 @@ jobs:
 
         if [ -z "$DEVICE_CODENAME" ]; then
           DEVICE_CODENAME=$(jq -r --arg kv "$KERNEL_VER" --arg sl "$SUBLEVEL" \
-            '[.devices | to_entries[] | select(.value.kernel_version == $kv and .value.sub_level == $sl) | .key] | first // empty' \
+            '[.devices | to_entries[] | select(.key | startswith("_") | not) | select(.value.kernel_version == $kv and .value.sub_level == $sl) | .key] | first // empty' \
             "$PROFILE_FILE")
         fi
 
@@ -346,11 +390,14 @@ jobs:
         STOCK_BUILD_HOST=$(jq -r ".devices.${DEVICE_CODENAME}.stock_kernel.build_host" "$PROFILE_FILE")
         STOCK_COMPILER=$(jq -r ".devices.${DEVICE_CODENAME}.stock_kernel.compiler_info // empty" "$PROFILE_FILE")
 
-        # 5.x/6.1 Makefile prepends KERNELVERSION; 6.6+ does not
-        if grep -q 'filechk_kernel.release.*KERNELVERSION' Makefile 2>/dev/null; then
-          RELEASE_OUTPUT="$STOCK_RELEASE"
-        else
+        # 5.10–6.1: Makefile prepends KERNELVERSION, setlocalversion outputs suffix only
+        # 6.6+: Makefile delegates entirely to setlocalversion, must output full version
+        MAJOR=${KERNEL_VER%%.*}
+        MINOR=${KERNEL_VER#*.}
+        if [ "$MAJOR" -gt 6 ] || { [ "$MAJOR" -eq 6 ] && [ "$MINOR" -ge 6 ]; }; then
           RELEASE_OUTPUT="${KERNEL_VER}.${SUBLEVEL}${STOCK_RELEASE}"
+        else
+          RELEASE_OUTPUT="$STOCK_RELEASE"
         fi
 
         cat > scripts/setlocalversion << 'SETLOCAL_EOF'
@@ -382,7 +429,7 @@ jobs:
       run: |
         BUILD_RC=0
         LTO_MODE=thin
-        [[ "$ANDROID_VER" == android16* ]] && LTO_MODE=none
+        [[ "$ANDROID_VER" == android16* || "$KERNEL_VER" == "6.12" ]] && LTO_MODE=none
         if [ -f "build/build.sh" ]; then
           KMI_SYMBOL_LIST_STRICT_MODE=0 HOSTLD=/usr/bin/ld.lld GKI_DEFCONFIG_FRAGMENT="$DEFCONFIG_FRAGMENT" LTO=$LTO_MODE BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh || BUILD_RC=$?
         else
@@ -400,6 +447,15 @@ jobs:
             exit "$BUILD_RC"
           fi
         fi
+
+    - name: Dump Build Errors
+      if: failure()
+      run: |
+        for LOG in $(find "$KERNEL_ROOT" -name '*.log' -newer "$KERNEL_ROOT/common" -type f 2>/dev/null | head -5); do
+          echo "::group::$(basename "$LOG")"
+          tail -80 "$LOG"
+          echo "::endgroup::"
+        done
 
     - name: Prepare AnyKernel3
       run: |
@@ -433,7 +489,7 @@ jobs:
         fi
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ env.FILE_NAME }}-AnyKernel3
         path: ./AnyKernel3/**
@@ -442,7 +498,7 @@ jobs:
 
     - name: Upload Rejects
       if: always() && env.REJ_COUNT > 0
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ env.FILE_NAME }}-Rejects
         path: patch-rejects/
@@ -482,3 +538,4 @@ jobs:
         } >> "$GITHUB_STEP_SUMMARY"
         REPORT="$GITHUB_WORKSPACE/$VERSION_DIR/build-helpers/report-config.sh"
         [ -f "$REPORT" ] && bash "$REPORT" "$KERNEL_ROOT" "$ANDROID_VER" "$KERNEL_VER" || true
+		
